@@ -7,7 +7,6 @@
 
 //Final Project MergeSort
 // Team members: Jesse Javana, Trevor Felchlin
-
 //Function prototypes
 void merge(int arr[], int l, int m, int r);
 void mergeSort_CPU(int arr[], int l, int r);
