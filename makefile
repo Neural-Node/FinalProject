@@ -1,31 +1,34 @@
+NVCC = nvcc -arch=sm_86
 CC = gcc
-NVCC = nvcc
-CFLAGS = -Wall -Wextra -Werror
-LDFLAGS = -lcudart
+CFLAGS = -Wall -Wextra -std=c99
 
-SRCDIR = .
-OBJDIR = obj
-BINDIR = bin
+# List of source files
+SOURCES = main.c MergeSort_CPU.c MergeSort_GPU.cu
+# List of header files
+HEADERS = MergeSort_CPU.h MergeSort_GPU.h
+# List of object files to be generated from source files
+OBJECTS = $(SOURCES:.c=.o)
+CU_OBJECTS = $(SOURCES:.cu=.o)
 
-SRC_FILES = $(wildcard $(SRCDIR)/*.c) $(wildcard $(SRCDIR)/*.cu)
-OBJ_FILES = $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.o, $(filter %.c, $(SRC_FILES))) \
-            $(patsubst $(SRCDIR)/%.cu, $(OBJDIR)/%.o, $(filter %.cu, $(SRC_FILES)))
-EXECUTABLE = $(BINDIR)/main
+# Default target
+all: merge_sort
 
-.PHONY: all clean
+# Target to compile the main program
+merge_sort: $(OBJECTS) $(CU_OBJECTS)
+	$(NVCC) $(OBJECTS) $(CU_OBJECTS) -o merge_sort
 
-all: $(EXECUTABLE)
+# Target to compile main.c into an object file
+main.o: main.c $(HEADERS)
+	$(CC) $(CFLAGS) -c main.c -o main.o
 
-$(EXECUTABLE): $(OBJDIR)/Main.o $(OBJDIR)/MergeSort_CPU.o $(OBJDIR)/MergeSort_GPU.o
-	$(NVCC) $(LDFLAGS) -o $@ $^ -lcudart
+# Target to compile each C source file into object files
+%.o: %.c $(HEADERS)
+	$(CC) $(CFLAGS) -c $< -o $@
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+# Target to compile each CUDA source file into object files
+%.o: %.cu $(HEADERS)
+	$(NVCC) -c $< -o $@
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.cu
-	$(NVCC) -c $< -o $@  # Remove -Werror
-
+# Clean up intermediate files and the final executable
 clean:
-	rm -rf $(OBJDIR) $(BINDIR)
-
-$(shell mkdir -p $(OBJDIR) $(BINDIR))
+	rm -f $(OBJECTS) merge_sort
