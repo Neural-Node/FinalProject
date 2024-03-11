@@ -40,4 +40,5 @@ __global__ void mergeSort(int *arr, int *temp, int l, int r) {
         // Merge the sorted halves
         merge<<<1, THREADS_PER_BLOCK>>>(arr, temp, l, m, r);
     }
+
 }
