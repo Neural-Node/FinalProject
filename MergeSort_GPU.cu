@@ -1,4 +1,4 @@
-// MergeSort_GPU.c
+// MergeSort_GPU.cu
 #include "MergeSort_GPU.h"
 
 // Implementation of mergeSort_GPU
