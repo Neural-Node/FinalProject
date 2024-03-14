@@ -1,8 +1,6 @@
-// MergeSort_GPU.h
-#ifndef MERGE_SORT_GPU_H
-#define MERGE_SORT_GPU_H
+#ifndef MERGE_SORT_H
+#define MERGE_SORT_H
 
-// Function prototype for mergeSort_GPU
-void mergeSort_GPU(int arr[], int l, int r);
-
-#endif
+mergeSort_GPU(int *arr, int *temp, int n);
+mergeGPU(int *arr, int *temp, int l, int m, int r);
+#endif // MERGE_SORT_H

@@ -1,12 +1,11 @@
-#include "MergeSort_GPU.h"
 #include <stdio.h>
-
+#include <cuda_runtime.h>
 #define THREADS_PER_BLOCK 256
 
-__global__ void merge(int *arr, int *temp, int l, int m, int r) {
-    int i = l + blockIdx.x * blockDim.x + threadIdx.x;
-    int j = m + 1 + blockIdx.x * blockDim.x + threadIdx.x;
-    int k = l + blockIdx.x * blockDim.x + threadIdx.x;
+__device__ void mergeGPU(int *arr, int *temp, int l, int m, int r) {
+    int i = l + threadIdx.x;
+    int j = m + 1 + threadIdx.x;
+    int k = l + threadIdx.x;
     
     // Merge the two sorted arrays into temp array
     while (i <= m && j <= r) {
@@ -25,20 +24,21 @@ __global__ void merge(int *arr, int *temp, int l, int m, int r) {
         temp[k++] = arr[j++];
     
     // Copy the merged portion back to the original array
-    for (i = l + blockIdx.x * blockDim.x + threadIdx.x; i <= r; i += blockDim.x * gridDim.x)
+    for (i = l + threadIdx.x; i <= r; i += blockDim.x)
         arr[i] = temp[i];
 }
 
-__global__ void mergeSort(int *arr, int *temp, int l, int r) {
-    if (l < r) {
-        int m = l + (r - l) / 2;
-        
-        // Recursively sort the two halves
-        mergeSort<<<(r - l + 1) / THREADS_PER_BLOCK + 1, THREADS_PER_BLOCK>>>(arr, temp, l, m);
-        mergeSort<<<(r - l + 1) / THREADS_PER_BLOCK + 1, THREADS_PER_BLOCK>>>(arr, temp, m + 1, r);
-        
-        // Merge the sorted halves
-        merge<<<1, THREADS_PER_BLOCK>>>(arr, temp, l, m, r);
+__global__ void mergeSort_GPU(int *arr, int *temp, int n) {
+    int tid = threadIdx.x + blockIdx.x * blockDim.x;
+    int l, r, m;
+    
+    // Merge sort algorithm
+    for (int size = 1; size < n; size *= 2) {
+        for (int start = 0; start < n - 1; start += 2 * size) {
+            l = start;
+            m = start + size - 1;
+            r = min(start + 2 * size - 1, n - 1);
+            mergeGPU(arr, temp, l, m, r);
+        }
     }
-
 }
