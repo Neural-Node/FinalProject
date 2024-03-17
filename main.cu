@@ -41,7 +41,7 @@ int main() {
 
     switch (choice) {
         case 1:
-            mergeSort_CPU(arr, 0, n - 1);
+            //mergeSort_CPU(arr, 0, n - 1);
             printf("\nSorted Array using CPU Merge Sort:\n");
             for (int i = 0; i < n; i++) {
                 printf("%d ", arr[i]);
