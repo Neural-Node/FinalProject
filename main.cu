@@ -5,6 +5,7 @@
 #include "MergeSort_GPU.h"
 
 #define MAX_SIZE 1000
+#define THREADS_PER_BLOCK 256
 
 int main() {
     int n;
@@ -39,9 +40,11 @@ int main() {
     printf("Enter your choice: ");
     scanf("%d", &choice);
 
+    int *temp_gpu = NULL; // Initialize temp_gpu pointer outside the switch
+
     switch (choice) {
         case 1:
-            //mergeSort_CPU(arr, 0, n - 1);
+            mergeSort_CPU(arr, 0, n - 1); // Sort the array using CPU merge sort
             printf("\nSorted Array using CPU Merge Sort:\n");
             for (int i = 0; i < n; i++) {
                 printf("%d ", arr[i]);
@@ -49,11 +52,15 @@ int main() {
             break;
 
         case 2:
-            mergeSort_GPU(arr_copy,0, n);
+            temp_gpu = (int *)malloc(n * sizeof(int)); // Allocate memory for temporary array
+            mergeSort_GPU<<<1, THREADS_PER_BLOCK>>>(arr_copy, temp_gpu, n); // Launch GPU merge sort
+            cudaDeviceSynchronize(); // Wait for GPU to finish
             printf("\nSorted Array using GPU Merge Sort:\n");
             for (int i = 0; i < n; i++) {
                 printf("%d ", arr_copy[i]);
             }
+            printf("\n");
+            free(temp_gpu); // Free temporary array memory
             break;
 
         default:
