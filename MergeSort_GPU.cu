@@ -39,6 +39,12 @@ __global__ void mergeSort_GPU(int *arr, int *temp, int n, int *sorted_arr) {
             m = start + size - 1;
             r = min(start + 2 * size - 1, n - 1);
             mergeGPU(arr, temp, l, m, r);
+	    __syncthreads(); //Synching theads before preceeding
         }
+    }
+    
+    // Copy sorted array from device to host
+    for (int i = tid; i <n; i += blockDim.x * gridDim.x) {
+	sorted_arr[i] = arr[i];
     }
 }

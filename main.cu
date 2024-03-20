@@ -66,11 +66,25 @@ int main() {
             break;
         }
         case 2:
-            mergeSort_GPU(arr_copy,0, n);
+	    // Timing GPU mergeSort
+            cudaEvent_t start, end;
+            cudaEventCreate(&start);
+	    cudaEventCreate(&end);
+            cudaEventRecord(start);
+
+            mergeSort_GPU(arr_copy,0, n, sorted_arr);
+
+	    cudaEventRecord(end);
+	    cudaEventSynchronize(end);
+            float elapsed_time;
+	    cudaEventElapsedTime(&elapsed_time, start, end);
             printf("\nSorted Array using GPU Merge Sort:\n");
             for (int i = 0; i < n; i++) {
-                printf("%d ", arr_copy[i]);
+                printf("%d ", sorted_arr[i]);
             }
+	    printf("\nTime elapsed: %.6f ms\n", elapsed_time);
+	    cudaEventDestroy(start);
+	    cudaEventDestroy(end);
             break;
 
         default:
