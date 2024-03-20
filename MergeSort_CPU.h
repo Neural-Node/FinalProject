@@ -1,12 +1,8 @@
 #ifndef MERGESORT_CPU_H
 #define MERGESORT_CPU_H
 
-// Merges two subarrays of arr[].
-// First subarray is arr[l..m]
-// Second subarray is arr[m+1..r]
-void merge(int* arr, int l, int m, int r);
-
-// Main function to perform merge sort
-void mergeSort_CPU(int* arr, int l, int r);
+// Function prototypes for CPU merge sort
+void merge(int arr[], int l, int m, int r, int sorted_array[]);
+void mergeSort_CPU(int arr[], int l, int r, int sorted_array[]);
 
 #endif  // MERGESORT_CPU_H
