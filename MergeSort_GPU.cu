@@ -28,23 +28,37 @@ __device__ void mergeGPU(int *arr, int *temp, int l, int m, int r) {
         arr[i] = temp[i];
 }
 
-__global__ void mergeSort_GPU(int *arr, int *temp, int n, int *sorted_arr) {
+__global__ void mergeSort_GPU_kernel(int *arr, int *temp, int n) {
+    // Calculate thread and block indices
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
-    int l, r, m;
+    int stride = blockDim.x * gridDim.x;
     
     // Merge sort algorithm
     for (int size = 1; size < n; size *= 2) {
-        for (int start = 0; start < n - 1; start += 2 * size) {
-            l = start;
-            m = start + size - 1;
-            r = min(start + 2 * size - 1, n - 1);
-            mergeGPU(arr, temp, l, m, r);
-	    __syncthreads(); //Synching theads before preceeding
+        for (int start = tid; start < n - 1; start += stride * size) {
+            int l = start;
+            int m = min(start + size - 1, n -1);
+            int r = min(start + 2 * size - 1, n - 1);
+            mergeGPU(arr, temp, l, m, r);    
         }
+	__syncthreads(); //Ensure all theads completed before proceeding
     }
     
-    // Copy sorted array from device to host
-    for (int i = tid; i <n; i += blockDim.x * gridDim.x) {
-	sorted_arr[i] = arr[i];
-    }
+}
+
+void mergeSort_GPU(int *arr, int *temp, int n, int *sorted_arr) {
+    int *arr_gpu, *temp_gpu;
+    cudaMalloc((void**)&arr_gpu, n * sizeof(int));
+    cudaMalloc((void**)&temp_gpu, n * sizeof(int));
+
+    cudaMemcpy(arr_gpu, arr, n * sizeof(int), cudaMemcpyHostToDevice);
+
+    // Launch kernel
+    int blocks = (n + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK;
+    mergeSort_GPU_kernel<<<blocks, THREADS_PER_BLOCK>>>(arr_gpu, temp_gpu, n);
+
+    cudaMemcpy(sorted_arr, arr_gpu, n * sizeof(int), cudaMemcpyDeviceToHost);
+
+    cudaFree(arr_gpu);
+    cudaFree(temp_gpu);
 }
