@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <cuda_runtime.h>
-#define THREADS_PER_BLOCK 256
+#define THREADS_PER_BLOCK 1024
 
 __device__ void Merge(int* arr, int* temp, int left, int middle, int right) {
     int i = left;

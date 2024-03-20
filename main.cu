@@ -7,7 +7,7 @@
 // Define your GPU merge sort function here
 void mergeSort_GPU(int *arr, int n, int *sorted_arr);
 
-#define MAX_SIZE 1000
+#define MAX_SIZE 1000000000000
 
 int main() {
     int n;
@@ -21,54 +21,45 @@ int main() {
         return 1;
     }
 
-    int *arr = (int *)malloc(n * sizeof(int));
-    int *sorted_arr = (int *)malloc(n * sizeof(int));
+    int *arr_cpu = (int *)malloc(n * sizeof(int));
+    int *arr_gpu = (int *)malloc(n * sizeof(int));
+    int *sorted_arr_cpu = (int *)malloc(n * sizeof(int));
+    int *sorted_arr_gpu = (int *)malloc(n * sizeof(int));
 
-    // Generate random array
+    // Generate random arrays
     srand(time(NULL));
-    printf("\nOriginal Array:\n");
     for (int i = 0; i < n; i++) {
-        arr[i] = rand() % 100; // Generate random values between 0 and 99
-        printf("%d ", arr[i]);
+        arr_cpu[i] = rand() % 100; // Generate random values between 0 and 99
+        arr_gpu[i] = arr_cpu[i];
     }
-    printf("\n");
 
-    // Menu for sorting options
-    int choice;
-    printf("\nChoose sorting option: \n");
-    printf("1. CPU Merge Sort\n");
-    printf("2. GPU Merge Sort \n");
-    printf("Enter your choice: ");
-    scanf("%d", &choice);
+    // CPU Merge Sort
+    clock_t start_cpu, end_cpu;
+    double cpu_time_used;
 
-    switch (choice) {
-        case 1: {
-            mergeSort_CPU(arr, 0, n - 1, sorted_arr);
-            printf("\nSorted Array using CPU Merge Sort:\n");
-            for (int i = 0; i < n; i++) {
-                printf("%d ", sorted_arr[i]); // Print the sorted array
-            }
-            printf("\n");
-            break;
-        }
-        case 2: {
-            // Call GPU merge sort
-            mergeSort_GPU(arr, n, sorted_arr);
-            printf("\nSorted Array using GPU Merge Sort:\n");
-            for (int i = 0; i < n; i++) {
-                printf("%d ", sorted_arr[i]); // Print the sorted array
-            }
-            printf("\n");
-            break;
-        }
-        default:
-            printf("Invalid choice\n");
-            break;
-    }
+    start_cpu = clock();
+    mergeSort_CPU(arr_cpu, 0, n - 1, sorted_arr_cpu);
+    end_cpu = clock();
+    cpu_time_used = ((double) (end_cpu - start_cpu)) / CLOCKS_PER_SEC;
+    printf("\nSorted Array using CPU Merge Sort:\n");
+    printf("Time elapsed for CPU Merge Sort: %f seconds\n", cpu_time_used);
+
+    // GPU Merge Sort
+    clock_t start_gpu, end_gpu;
+    double gpu_time_used;
+
+    start_gpu = clock();
+    mergeSort_GPU(arr_gpu, n, sorted_arr_gpu);
+    end_gpu = clock();
+    gpu_time_used = ((double) (end_gpu - start_gpu)) / CLOCKS_PER_SEC;
+    printf("\nSorted Array using GPU Merge Sort:\n");
+    printf("Time elapsed for GPU Merge Sort: %f seconds\n", gpu_time_used);
 
     // Free dynamically allocated memory
-    free(arr);
-    free(sorted_arr);
+    free(arr_cpu);
+    free(arr_gpu);
+    free(sorted_arr_cpu);
+    free(sorted_arr_gpu);
 
     return 0;
 }
