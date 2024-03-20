@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <cuda_runtime.h>
 #include "MergeSort_CPU.h"
 #include "MergeSort_GPU.h"
 
@@ -22,7 +23,6 @@ int main() {
     int *arr_copy = (int *)malloc(n * sizeof(int));
     int *sorted_arr = (int *)malloc(n * sizeof(int));
 
-
     // Generate random array
     srand(time(NULL));
     printf("\nOriginal Array:\n");
@@ -41,15 +41,30 @@ int main() {
     printf("Enter your choice: ");
     scanf("%d", &choice);
 
+
     switch (choice) {
-        case 1:
+        case 1: {
+	    // Timing CPU mergeSort
+	    cudaEvent_t start, end;
+	    cudaEventCreate(&start);
+	    cudaEventCreate(&end);
+            cudaEventRecord(start);
+
             mergeSort_CPU(arr, 0, n - 1,sorted_arr);
+
+            cudaEventRecord(end);
+            cudaEventSynchronize(end);
+            float elapsed_time;
+            cudaEventElapsedTime(&elapsed_time, start, end);
             printf("\nSorted Array using CPU Merge Sort:\n");
             for (int i = 0; i < n; i++) {
                 printf("%d ", sorted_arr[i]); // Print the sorted array
             }
+	    printf("\nTime elapsed %.6f ms\n", elapsed_time);
+            cudaEventDestroy(start);
+	    cudaEventDestroy(end);
             break;
-
+        }
         case 2:
             mergeSort_GPU(arr_copy,0, n);
             printf("\nSorted Array using GPU Merge Sort:\n");
